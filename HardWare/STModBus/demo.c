@@ -46,8 +46,18 @@ USHORT usRegInputStart = REG_INPUT_START;
 USHORT usRegInputBuf[REG_INPUT_NREGS];
 
 USHORT usRegHoldingStart = REG_HOLDING_START;
-USHORT usRegHoldingBuf[REG_HOLDING_NREGS];
+USHORT usRegHoldingBuf[REG_HOLDING_NREGS]  = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+#define REG_COILS_START     1
+#define REG_COILS_SIZE      512
+unsigned char ucRegCoilsBuf[REG_COILS_SIZE/8];
+	void
+extern xMBUtilSetBits( UCHAR * ucByteBuf, USHORT usBitOffset, UCHAR ucNBits,
+                UCHAR ucValue );
+extern 
+UCHAR
+xMBUtilGetBits( UCHAR * ucByteBuf, USHORT usBitOffset, UCHAR ucNBits );
 
+	
 /**
   *****************************************************************************
   * @Name   : ²Ù×÷ÊäÈë¼Ä´æÆ÷
@@ -170,8 +180,58 @@ eMBErrorCode eMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usN
   * @Output : none
   *
   * @Return : Modbus×´Ì¬ÐÅÏ¢
-  *****************************************************************************
-**/
+  *******************************************************************************/
+//eMBErrorCode
+//eMBRegCoilsCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils,
+//               eMBRegisterMode eMode )
+//{
+//    eMBErrorCode    eStatus = MB_ENOERR;
+//    int             iNCoils = ( int )usNCoils;
+//    unsigned short  usBitOffset;
+
+//    /* Check if we have registers mapped at this block. */
+//    if( ( usAddress >= REG_COILS_START ) &&
+//        ( usAddress + usNCoils <= REG_COILS_START + REG_COILS_SIZE ) )
+//    {
+//        usBitOffset = ( unsigned short )( usAddress - REG_COILS_START );
+//        switch ( eMode )
+//        {
+//                /* Read current values and pass to protocol stack. */
+//            case MB_REG_READ:
+//                while( iNCoils > 0 )
+//                {
+//                    *pucRegBuffer++ =
+//                        xMBUtilGetBits( ucRegCoilsBuf, usBitOffset,
+//                                        ( unsigned char )( iNCoils >
+//                                                           8 ? 8 :
+//                                                           iNCoils ) );
+//                    iNCoils -= 8;
+//                    usBitOffset += 8;
+//                }
+//                break;
+
+//                /* Update current register values. */
+//            case MB_REG_WRITE:
+//                while( iNCoils > 0 )
+//                {
+//                    xMBUtilSetBits( ucRegCoilsBuf, usBitOffset, 
+//                                    ( unsigned char )( iNCoils > 8 ? 8 : iNCoils ),
+//                                    *pucRegBuffer++ );
+//                    iNCoils -= 8;
+//                    usBitOffset += 8;
+//                }
+//                break;
+//        }
+
+//    }
+//    else
+//    {
+//        eStatus = MB_ENOREG;
+//    }
+//    return eStatus;
+//}
+
+
 eMBErrorCode eMBRegCoilsCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils, eMBRegisterMode eMode )
 {
 	eMBErrorCode eStatus = MB_ENOERR;
@@ -238,3 +298,11 @@ eMBErrorCode eMBRegDiscreteCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT us
 	
 	return MB_ENOREG;
 }
+
+//void
+//__assert( const char *pcFile, const char *pcLine, int iLineNumber )
+//{
+//    portENTER_CRITICAL(  );
+//    for( ;; );
+//}
+

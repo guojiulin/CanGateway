@@ -34,6 +34,7 @@ extern "C" {
 extern CAN_HandleTypeDef hcan;
 
 /* USER CODE BEGIN Private defines */
+	
 
 /* USER CODE END Private defines */
 

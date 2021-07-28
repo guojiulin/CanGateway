@@ -59,8 +59,8 @@ typedef int32_t LONG;
 
 #define REG_INPUT_START                          (USHORT)0x0001  //起始寄存器
 #define REG_INPUT_NREGS                          (USHORT)4  //寄存器个数
-#define REG_HOLDING_START                        (USHORT)0  //保持寄存器
-#define REG_HOLDING_NREGS                        (USHORT)2047  //保持寄存器个数
+#define REG_HOLDING_START                        (USHORT)0x0001//保持寄存器
+#define REG_HOLDING_NREGS                        (USHORT)512  //保持寄存器个数
 
 /******************************************************************************
                                外部调用功能函数
@@ -68,5 +68,5 @@ typedef int32_t LONG;
 
 extern USHORT usRegInputBuf[REG_INPUT_NREGS];
 extern USHORT usRegHoldingBuf[REG_HOLDING_NREGS];
-
+//extern USHORT   ucRegCoilsBuf[REG_COILS_SIZE / 8];
 #endif

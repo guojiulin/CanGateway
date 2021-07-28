@@ -113,8 +113,8 @@ int main(void)
   MX_FREERTOS_Init();
   /* Start scheduler */
   osKernelStart();
-	eMBInit(MB_RTU, 0x01, 1, 115200, MB_PAR_NONE);
-	eMBEnable(  );
+//	eMBInit(MB_RTU, 0x01, 1, 115200, MB_PAR_NONE);
+//	eMBEnable(  );
 
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */

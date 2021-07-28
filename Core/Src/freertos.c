@@ -29,7 +29,10 @@
 #include "can.h"
 #include "mb.h"
 #include "mbport.h"
-extern void CAN_Send_Message(uint8_t BANID);
+#include "port.h"
+extern void CAN_Send_Message(int BANID);
+//extern USHORT usRegHoldingBuf[REG_HOLDING_NREGS];
+//extern unsigned char data[64];
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -201,7 +204,8 @@ void Modbus(void *argument)
   for(;;)
   {
 			(void)eMBPoll();
-    osDelay(1);
+
+   // osDelay(1);
   }
   /* USER CODE END Modbus */
 }
@@ -221,12 +225,10 @@ void Can(void *argument)
   {
 		for(int i=0; i<8;i++)
 		{
-
-		CAN_Send_Message(0x1401013f);
-			
+			CAN_Send_Message(i);		
+			     osDelay(1);
 		}
-		
-    osDelay(1);
+
   }
   /* USER CODE END Can */
 }
@@ -241,9 +243,10 @@ void Can(void *argument)
 void Cmd(void *argument)
 {
   /* USER CODE BEGIN Cmd */
+
   /* Infinite loop */
   for(;;)
-  {
+  { 
     osDelay(1);
   }
   /* USER CODE END Cmd */

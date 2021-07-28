@@ -21,6 +21,8 @@
 #include "can.h"
 
 /* USER CODE BEGIN 0 */
+#include "mb.h"
+#include "mbport.h"
 CAN_HandleTypeDef hcan;
 CAN_FilterTypeDef  CAN_FilterInitStructure;
 
@@ -30,9 +32,10 @@ CAN_RxHeaderTypeDef   RxHeader;
 uint8_t               TxData[8] = {0};
 uint8_t               RxData[8] = {0};
 uint32_t              TxMailbox;
-//uint32_t ALLID[8] = {0x1401013F,0x1401023f,0x1401033f,0x1401043F,0x1401053F,0x1401063F,0x1401073F,0x1401083F};
-uint8_t data[8] = {0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff};
-
+unsigned char data[64];
+#define REG_COILS_SIZE      512
+extern unsigned char ucRegCoilsBuf[REG_COILS_SIZE / 8];
+extern USHORT usRegHoldingBuf[REG_HOLDING_NREGS];
 /* USER CODE END 0 */
 
 CAN_HandleTypeDef hcan;
@@ -179,53 +182,103 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 }
 
 /* USER CODE BEGIN 1 */
-void CAN_Send_Message(uint8_t BANID)
+void CAN_Send_Message(int BANID)
 {   
+  	switch(BANID)
+		{	case 0:
+				TxHeader.ExtId = 0x1401013F;
+				break;
+			case 1:
+				TxHeader.ExtId = 0x1401023F;
+				break;
+			case 2:
+				TxHeader.ExtId = 0x1401033F;
+				break;
+			case 3:
+				TxHeader.ExtId = 0x1401043F;
+				break;
+			case 4:
+				TxHeader.ExtId = 0x1401053F;
+				break;
+			case 5:
+				TxHeader.ExtId = 0x1401063F;
+				break;
+			case 6:
+				TxHeader.ExtId = 0x1401073F;
+				break;
+			case 7:
+				TxHeader.ExtId = 0x1401083F;
+				break;
+				}
+		
+			TxHeader.RTR = CAN_RTR_DATA;
+			TxHeader.IDE = CAN_ID_EXT;
+			TxHeader.DLC = 8;
+			TxHeader.TransmitGlobalTime = DISABLE;
 
-  TxHeader.ExtId = BANID;
-  TxHeader.RTR = CAN_RTR_DATA;
-  TxHeader.IDE = CAN_ID_EXT;
-  TxHeader.DLC = 8;
-  TxHeader.TransmitGlobalTime = DISABLE;
-//	TxData[0]=Data;
- 		 strcpy(TxData,data,8);
-    HAL_CAN_AddTxMessage(&hcan,&TxHeader,TxData,&TxMailbox);
+//				for(int loop = (BANID*8);loop<8+(BANID*8);loop++)
+//				{
+//					TxData[loop] = ucRegCoilsBuf[loop];
+//				}
+   for(int i=0;i<64;i++)
+ {
+     unsigned char c=0;
+ 		for(int loop=0;loop<8;loop++)
+ 	{
+ 		c=(usRegHoldingBuf[loop+8*i]<<(7-loop))|c;
+ 	}
+
+     data[i]=c;
+
+			HAL_CAN_AddTxMessage(&hcan,&TxHeader,TxData,&TxMailbox);
 }
 
-
+}
 
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *CanHandle)
 {
   /* Get RX message */
-  if (HAL_CAN_GetRxMessage(CanHandle, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
-  {
-    /* Reception Error */
-		printf("接收数据为");
-    Error_Handler();
-  }
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
+	int BANID;
+	RxHeader.ExtId = 0x00; 
+  RxHeader.RTR = CAN_RTR_DATA;
+  RxHeader.IDE = CAN_ID_EXT;
+  RxHeader.DLC = 8;
+	HAL_CAN_GetRxMessage(CanHandle, CAN_RX_FIFO0, &RxHeader, RxData);
+			
+	switch(RxHeader.ExtId)
+		{
+			case 0x18013F01:
+				BANID  = 0;
+				break;
+		  case 0x18013F02:
+				BANID  = 1;
+				break;
+		  case 0x18013F03:
+				BANID  = 2;
+				break;
+		  case 0x18013F04:
+				BANID  = 3;
+				break;
+		  case 0x18013F05:
+				BANID  = 4;
+				break;
+			case 0x18013F06:
+				BANID  = 5;
+				break;
+			case 0x18013F07:
+				BANID  = 6;
+				break;
+			case 0x18013F08:
+				BANID  = 7;
+				break;
+		}
 	
-	//printf("接收数据为：%d",RxData);
-	
-	if(RxData[0]==0x01)
-	{
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
-	}
-	else if(RxData[0]==0x80)
-	{
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
-	}
-	else if(RxData[0]==0x81)
-	{
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
-	}
-	
-	else if(RxData[0]==0x00)
-	{
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
-	}
- 
+			for(int zu=0;zu<8;zu++)
+			{
+			data[zu+8*BANID]=RxData[zu];	
+			}
+
 }
 
 /* USER CODE END 1 */

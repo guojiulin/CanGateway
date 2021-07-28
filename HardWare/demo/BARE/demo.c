@@ -22,34 +22,19 @@
 /* ----------------------- Modbus includes ----------------------------------*/
 #include "mb.h"
 #include "mbport.h"
-
+#include "mbutils.h"
 /* ----------------------- Defines ------------------------------------------*/
 #define REG_INPUT_START 1000
 #define REG_INPUT_NREGS 4
+#define REG_COILS_START 1000
+#define REG_COILS_SIZE  16
 
 /* ----------------------- Static variables ---------------------------------*/
-static USHORT   usRegInputStart = REG_INPUT_START;
-static USHORT   usRegInputBuf[REG_INPUT_NREGS];
+USHORT   usRegInputStart = REG_INPUT_START;
+USHORT   usRegInputBuf[REG_INPUT_NREGS];
+USHORT   ucRegCoilsBuf[REG_COILS_SIZE / 8];
 
 /* ----------------------- Start implementation -----------------------------*/
-int
-main( void )
-{
-    eMBErrorCode    eStatus;
-
-    eStatus = eMBInit( MB_RTU, 0x0A, 0, 38400, MB_PAR_EVEN );
-
-    /* Enable the Modbus Protocol Stack. */
-    eStatus = eMBEnable(  );
-
-    for( ;; )
-    {
-        ( void )eMBPoll(  );
-
-        /* Here we simply count the number of poll cycles. */
-        usRegInputBuf[0]++;
-    }
-}
 
 eMBErrorCode
 eMBRegInputCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs )
@@ -91,7 +76,50 @@ eMBErrorCode
 eMBRegCoilsCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils,
                eMBRegisterMode eMode )
 {
-    return MB_ENOREG;
+    eMBErrorCode    eStatus = MB_ENOERR;
+    int             iNCoils = ( int )usNCoils;
+    unsigned short  usBitOffset;
+
+    /* Check if we have registers mapped at this block. */
+    if( ( usAddress >= REG_COILS_START ) &&
+        ( usAddress + usNCoils <= REG_COILS_START + REG_COILS_SIZE ) )
+    {
+        usBitOffset = ( unsigned short )( usAddress - REG_COILS_START );
+        switch ( eMode )
+        {
+                /* Read current values and pass to protocol stack. */
+            case MB_REG_READ:
+                while( iNCoils > 0 )
+                {
+                    *pucRegBuffer++ =
+                        xMBUtilGetBits( ucRegCoilsBuf, usBitOffset,
+                                        ( unsigned char )( iNCoils >
+                                                           8 ? 8 :
+                                                           iNCoils ) );
+                    iNCoils -= 8;
+                    usBitOffset += 8;
+                }
+                break;
+
+                /* Update current register values. */
+            case MB_REG_WRITE:
+                while( iNCoils > 0 )
+                {
+                    xMBUtilSetBits( ucRegCoilsBuf, usBitOffset, 
+                                    ( unsigned char )( iNCoils > 8 ? 8 : iNCoils ),
+                                    *pucRegBuffer++ );
+                    iNCoils -= 8;
+                    usBitOffset += 8;
+                }
+                break;
+        }
+
+    }
+    else
+    {
+        eStatus = MB_ENOREG;
+    }
+    return eStatus;
 }
 
 eMBErrorCode

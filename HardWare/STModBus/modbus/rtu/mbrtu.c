@@ -149,7 +149,7 @@ eMBRTUStop( void )
 eMBErrorCode
 eMBRTUReceive( UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength )
 {
-    BOOL            xFrameReceived = FALSE;
+    BOOL  xFrameReceived = FALSE;
     eMBErrorCode    eStatus = MB_ENOERR;
 
     ENTER_CRITICAL_SECTION(  );
