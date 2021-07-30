@@ -23,16 +23,20 @@
 #include "mb.h"
 #include "mbport.h"
 #include "mbutils.h"
+#include "port.h"
+#include "usart.h"
 /* ----------------------- Defines ------------------------------------------*/
-#define REG_INPUT_START 1000
-#define REG_INPUT_NREGS 4
-#define REG_COILS_START 1000
-#define REG_COILS_SIZE  16
+
 
 /* ----------------------- Static variables ---------------------------------*/
 USHORT   usRegInputStart = REG_INPUT_START;
 USHORT   usRegInputBuf[REG_INPUT_NREGS];
-USHORT   ucRegCoilsBuf[REG_COILS_SIZE / 8];
+UCHAR   ucRegCoilsBuf[REG_COILS_SIZE / 8];    
+//extern xMBUtilSetBits( UCHAR * ucByteBuf, USHORT usBitOffset, UCHAR ucNBits,
+//                UCHAR ucValue );
+//extern 
+//UCHAR
+//xMBUtilGetBits( UCHAR * ucByteBuf, USHORT usBitOffset, UCHAR ucNBits );
 
 /* ----------------------- Start implementation -----------------------------*/
 

@@ -33,9 +33,10 @@ uint8_t               TxData[8] = {0};
 uint8_t               RxData[8] = {0};
 uint32_t              TxMailbox;
 unsigned char data[64];
-#define REG_COILS_SIZE      512
-extern unsigned char ucRegCoilsBuf[REG_COILS_SIZE / 8];
-extern USHORT usRegHoldingBuf[REG_HOLDING_NREGS];
+//#define REG_COILS_SIZE      512
+//extern unsigned char ucRegCoilsBuf[REG_COILS_SIZE / 8];
+//extern USHORT usRegHoldingBuf[REG_HOLDING_NREGS];
+extern UCHAR  ucSCoilBuf[S_COIL_NCOILS/8];
 /* USER CODE END 0 */
 
 CAN_HandleTypeDef hcan;
@@ -216,23 +217,32 @@ void CAN_Send_Message(int BANID)
 			TxHeader.DLC = 8;
 			TxHeader.TransmitGlobalTime = DISABLE;
 
+
+//   for(int i=0;i<64;i++)
+// {
+//     unsigned char c=0;
+// 		for(int loop=0;loop<8;loop++)
+// 	{
+// 		c=(usRegHoldingBuf[loop+8*i]<<(7-loop))|c;
+// 	}
+//     data[i]=c;	
+//}
+//	for(int loop=0;loop<8;loop++)
+// 	{
+// 	TxData[loop] = data[loop+(8*BANID)];
+// 	}
+
+
+	for(int loop=0;loop<8;loop++)
+ 	{
+ 	TxData[loop] = ucSCoilBuf[loop+(8*BANID)];
+ 	}
 //				for(int loop = (BANID*8);loop<8+(BANID*8);loop++)
 //				{
-//					TxData[loop] = ucRegCoilsBuf[loop];
+//					TxData[loop] = ucMCoilBuf[loop];
 //				}
-   for(int i=0;i<64;i++)
- {
-     unsigned char c=0;
- 		for(int loop=0;loop<8;loop++)
- 	{
- 		c=(usRegHoldingBuf[loop+8*i]<<(7-loop))|c;
- 	}
 
-     data[i]=c;
-
-			HAL_CAN_AddTxMessage(&hcan,&TxHeader,TxData,&TxMailbox);
-}
-
+	HAL_CAN_AddTxMessage(&hcan,&TxHeader,TxData,&TxMailbox);
 }
 
 
@@ -274,9 +284,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *CanHandle)
 				break;
 		}
 	
-			for(int zu=0;zu<8;zu++)
+			for(int loop=0;loop<8;loop++)
 			{
-			data[zu+8*BANID]=RxData[zu];	
+			ucSCoilBuf[loop+(8*BANID)] = RxData[loop] ;
 			}
 
 }

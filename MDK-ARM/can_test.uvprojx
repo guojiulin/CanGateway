@@ -688,11 +688,6 @@
               <FileType>1</FileType>
               <FilePath>..\HardWare\STModBus\modbus\mb.c</FilePath>
             </File>
-            <File>
-              <FileName>demo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HardWare\STModBus\demo.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -712,6 +707,11 @@
               <FileName>porttimer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HardWare\STModBus\port\porttimer.c</FilePath>
+            </File>
+            <File>
+              <FileName>demo1.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HardWare\STModBus\demo1.c</FilePath>
             </File>
           </Files>
         </Group>
